@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>🚗 Calculadora de Rotas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mapbox/polyline@1.1.1/src/polyline.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body, html { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    #map { width: 100%; height: 60vh; }
+  
+    .controls {
+      padding: 15px;
+      background: #f0f0f0;
+    }
+    .controls input, .controls select, .controls button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px 8px 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+    }
+  
+    .controls button {
+      border: none;
+      font-weight: bold;
+    }
+  
+    .btn-verde {
+      background-color: #4CAF50;
+      color: white;
+    }
+  
+    .btn-vermelho {
+      background-color: #f44336;
+      color: white;
+    }
+  
+    .btn-amarelo {
+      background-color: #FFEB3B;
+      color: #333;
+    }
+  
+    .btn-blue {
+      background-color: #2196F3;
+      color: white;
+    }
+  
+    .btn-verde:hover,
+    .btn-vermelho:hover,
+    .btn-blue:hover,
+    .btn-amarelo:hover {
+      opacity: 0.9;
+      transform: scale(1.03);
+      cursor: pointer;
+    }
+  
+    .btn-hover-vermelho:hover {
+      background-color: #d32f2f;
+    }
+  
+    .salvar-btn {
+      background-color: #009688;
+      color: white;
+    }
+  
+    .salvar-btn:hover {
+      background-color: #00796B;
+      transform: scale(1.03);
+    }
+  
+    #destinos {
+      margin-top: 10px;
+      list-style: none;
+      padding: 0;
+    }
+  
+    .destino {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background: #f9f9f9;
+      gap: 10px;
+      border-radius: 6px;
+    }
+  
+    .destino input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  
+    .output {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 18px;
+      color: green;
+    }
+  
+    .calc-info {
+      font-size: 14px;
+      color: #333;
+    }
+  
+    .resultados-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+    }
+  
+    #valor {
+      width: 80px;
+    }
+  
+    .tag-identificacao {
+      background-color: #FFEB3B;
+      color: #000;
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+  </style>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; padding: 20px; }
+    .container { background: rgb(247, 247, 247); padding: 30px; max-width: 1000px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1, h2 { text-align: center; color: #37b61e; }
+    .form-group { display: flex; flex-wrap: wrap; gap: 20px; }
+    .form-item { flex: 1 1 45%; display: flex; flex-direction: column; }
+    label { font-weight: bold; margin-bottom: 5px; }
+    input, select, textarea { padding: 10px; border: 1px solid #050505; border-radius: 5px; font-size: 15px; }
+    textarea { resize: vertical; }
+    button { background-color: #2E86C1; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    .valor-destaque { background: #dff0d8; color: #155724; padding: 15px; border-radius: 6px; font-size: 22px; text-align: center; margin-top: 20px; }
+    .resultado, #historicoContainer { margin-top: 20px; }
+    .resultado table, #historicoContainer table { width: 100%; border-collapse: collapse; background: white; }
+    table td, table th { padding: 10px; border: 1px solid #ffffff; text-align: center; }
+    th { background: #fffcfc; }
+  </style>
+</head>
+<body>
+
+    <div class="controls">
+        <label>👷‍♂️ Operador:</label>
+        <select id="operador" onchange="adicionarPorOperador()">
+          <option value="">Operador</option>
+          <option value="Amailson Gawlinski|R. Bento Gonçalves, 1244 - São Sebastiao, Esteio - RS, 93265-350">Amailson Gawlinski</option>
+          <option value="Caio José|R. Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
+          <option value="Daniel Rodrigo|R. Carlos Alberto Lauermann Nunes, 265 - Olaria, Canoas - RS, 92035-012">Daniel Rodrigo</option>
+          <option value="George Gonçalves|R. Três Mil Setecentos e Sessenta e Nove, 109 - Lomba do Pinheiro, Porto Alegre - RS, 91540-288">George Gonçalves</option>
+          <option value="Igor Nascimento|Servidão Nelson Juvêncio Rosa, 215 - Guaporanga, Biguaçu - SC, 88160-000">Igor Nascimento</option>
+          <option value="Lissandro da silva|R. Ana Rosa Rodrigues da Luz, 41, Sapucaia do Sul - RS, 93225-363">Lissandro da silva</option>
+          <option value="Patrick Darlan|R. Dona Maria Isabel, 28 - Harmonia, Canoas - RS, 92325-422">Patrick Darlan</option>
+          <option value="Ricardo Alves|Av. Lúcio Bittencourt, 1350 - Centro, Sapucaia do Sul - RS, 93214-170">Ricardo Alves</option>
+          <option value="Keniel Vasque|R. Roseli, 121 - Mathias Velho, Canoas - RS, 92330-105">Keniel Vasque</option>
+        </select>
+
+        <label>👷‍♂️👷‍♂️ Segundo Operador:</label>
+<select id="segundoOperador" onchange="adicionarPorSegundoOperador()">
+  <option value="">Segundo operador</option>
+  <option value="Amailson Gawlinski|R. Bento Gonçalves, 1244 - São Sebastiao, Esteio - RS, 93265-350">Amailson Gawlinski</option>
+  <option value="Caio José|R. Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
+  <option value="Daniel Rodrigo|R. Carlos Alberto Lauermann Nunes, 265 - Olaria, Canoas - RS, 92035-012">Daniel Rodrigo</option>
+  <option value="George Gonçalves|R. Três Mil Setecentos e Sessenta e Nove, 109 - Lomba do Pinheiro, Porto Alegre - RS, 91540-288">George Gonçalves</option>
+  <option value="Igor Nascimento|Servidão Nelson Juvêncio Rosa, 215 - Guaporanga, Biguaçu - SC, 88160-000">Igor Nascimento</option>
+  <option value="Lissandro da silva|R. Ana Rosa Rodrigues da Luz, 41, Sapucaia do Sul - RS, 93225-363">Lissandro da silva</option>
+  <option value="Patrick Darlan|R. Dona Maria Isabel, 28 - Harmonia, Canoas - RS, 92325-422">Patrick Darlan</option>
+  <option value="Ricardo Alves|Av. Lúcio Bittencourt, 1350 - Centro, Sapucaia do Sul - RS, 93214-170">Ricardo Alves</option>
+  <option value="Keniel Vasque|R. Roseli, 121 - Mathias Velho, Canoas - RS, 92330-105">Keniel Vasque</option>
+</select>
+
+  <label>🏢 Sede:</label>
+  <select id="sede" onchange="adicionarSede()">
+    <option value="">Sede</option>
+    <option value="AFT Sede Canoas|Av. Getúlio Vargas, 9075 - São José, Canoas - RS">AFT Sede Canoas</option>
+    <option value="AFT Sede Biguaçu|Rua José de Anchieta, 123 - Biguaçu - SC">AFT Sede Biguaçu</option>
+  </select>
+
+  <label>⛽ Gasolina (R$):</label>
+  <input type="number" id="valor" value="6.46" step="0.01" style="width: 45px;">
+
+  <button class="btn-blue" onclick="calcularRota()">🧮 Calcular Rota</button>
+  <button class="btn-blue" onclick="adicionarDestino()">➕ Adicionar</button>
+  <button class="btn-vermelho btn-hover-vermelho" onclick="resetarTudo()">🔄 Resetar</button>
+
+  <ul id="destinos"></ul>
+
+  <div class="resultados-container">
+    <div class="output" id="resultado">Distância: 0 km | Valor: R$ 0,00 | Tempo: 0 min</div>
+    <button class="btn-verde salvar-btn" onclick="salvarEmArquivo()">💾 Salvar</button>
+  </div>
+
+  <div class="calc-info" id="calculo-info"></div>
+</div>
+
+<div id="map"></div>
+
+<script>
+const map = L.map('map').setView([-28.2350, -52.9253], 7,8);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  let markers = [];
+  let routeLayer;
+
+  function adicionarDestino(valor = '', identificacao = '') {
+    const li = document.createElement('li');
+    li.className = 'destino';
+
+    const tag = identificacao ? `<span class="tag-identificacao">${identificacao}</span>` : '';
+    const datalistId = `dl-${Date.now()}`;
+    li.innerHTML = `
+      ${tag}
+      <input type="text" placeholder="📍 Digite endereço ou nome" value="${valor}" list="${datalistId}"
+        oninput="autocompletarEndereco(this, '${datalistId}')" onkeydown="verificaEnter(event)">
+      <datalist id="${datalistId}"></datalist>
+      <button onclick="limpar(this)" class="btn-amarelo btn-hover-vermelho">LIMPAR</button>
+      <button onclick="deletar(this)" class="btn-vermelho">DELETAR</button>
+    `;
+    document.getElementById('destinos').appendChild(li);
+  }
+
+  function adicionarPorOperador() {
+    const val = document.getElementById('operador').value;
+    if (!val) return;
+    const [nome, endereco] = val.split('|');
+
+    resetarTudo();
+    adicionarDestino(endereco, 'Origem');
+    adicionarDestino('', 'Parada');
+    adicionarDestino('', 'Destino');
+    adicionarDestino(endereco, 'Retorno');
+
+  }
+  function adicionarPorSegundoOperador() {
+  const val = document.getElementById('segundoOperador').value;
+  const primeiroOperador = document.getElementById('operador').value;
+  
+  // Se não houver segundo operador selecionado, apenas retorna.
+  if (!val) return;
+
+  const [nome2, endereco2] = val.split('|');
+  const destinos = document.querySelectorAll('.destino');
+
+  // Se o primeiro operador estiver na primeira posição
+  if (destinos.length >= 1) {
+    // Se já houver uma sede, altera a terceira posição para o segundo operador
+    if (document.getElementById('sede').value) {
+      destinos[2].innerHTML = destinos[2].innerHTML.replace(/<span.*?<\/span>/, '');  // Altera para a terceira posição
+      destinos[2].querySelector('input').value = endereco2;
+      destinos[2].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Segundo Operador</span>`);
+    } else {
+      // Se não houver sede, o segundo operador vai para a segunda posição
+      destinos[1].innerHTML = destinos[1].innerHTML.replace(/<span.*?<\/span>/, '');  // Altera para a segunda posição
+      destinos[1].querySelector('input').value = endereco2;
+      destinos[1].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Segundo Operador</span>`);
+    }
+  }
+  
+  recalcularRota();  // Chama a função para recalcular a rota
+}
+  function adicionarSede() {
+    const val = document.getElementById('sede').value;
+    if (!val) return;
+    const [nome, endereco] = val.split('|');
+    const destinos = document.querySelectorAll('.destino');
+    if (destinos.length >= 2) {
+      destinos[1].innerHTML = destinos[1].innerHTML.replace(/<span.*?<\/span>/, '');
+      destinos[1].querySelector('input').value = endereco;
+      destinos[1].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Sede</span>`);
+    } else {
+      adicionarDestino(endereco, 'Sede');
+    }
+  }
+
+  function verificaEnter(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      adicionarDestino();
+    }
+  }
+
+  function limpar(btn) {
+    btn.parentElement.querySelector('input').value = '';
+  }
+
+  function deletar(btn) {
+    btn.parentElement.remove();
+  }
+
+  function resetarTudo() {
+    document.getElementById('destinos').innerHTML = '';
+    document.getElementById('resultado').innerText = '📏 Distância: 0 km | 💰 Valor estimado: R$ 0,00 | ⏱️ Tempo estimado: 0 min';
+    document.getElementById('calculo-info').innerText = '';
+    markers.forEach(m => map.removeLayer(m));
+    if (routeLayer) map.removeLayer(routeLayer);
+    markers = [];
+    map.setView([-14.2350, -51.9253], 4);
+  }
+
+  async function autocompletarEndereco(input, datalistId) {
+    const val = input.value.trim();
+    if (val.length < 3) return;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=5&q=${encodeURIComponent(val)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const datalist = document.getElementById(datalistId);
+    datalist.innerHTML = '';
+    data.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.display_name;
+      datalist.appendChild(opt);
+    });
+  }
+
+  function recalcularRota() {
+    calcularRota();
+  }
+
+  function habilitarReordenacao() {
+    new Sortable(document.getElementById('destinos'), {
+      onEnd: recalcularRota
+    });
+  }
+
+  habilitarReordenacao();
+
+  async function calcularRota() {
+    const inputs = document.querySelectorAll('.destino input');
+    const waypoints = [];
+    markers.forEach(m => map.removeLayer(m));
+    if (routeLayer) map.removeLayer(routeLayer);
+    markers = [];
+
+    for (const input of inputs) {
+      const endereco = input.value.trim();
+      if (endereco) {
+        try {
+          const [lng, lat] = await geocodificar(endereco);
+          waypoints.push([lng, lat]);
+          markers.push(L.marker([lat, lng]).addTo(map));
+        } catch (err) {
+          alert(`❌ Erro no endereço: ${endereco}`);
+          return;
+        }
+      }
+    }
+
+    if (waypoints.length < 2) {
+      alert("⚠️ Adicione pelo menos dois destinos.");
+      return;
+    }
+
+    const coords = waypoints.map(p => p.join(',')).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=polyline&steps=true`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const route = data.routes[0];
+
+      const routeCoords = polyline.decode(route.geometry);
+      routeLayer = L.polyline(routeCoords.map(c => L.latLng(c[0], c[1])), {
+        color: 'blue',
+        weight: 5
+      }).addTo(map);
+      map.fitBounds(routeLayer.getBounds());
+
+      const tempo = Math.round(route.duration / 60);
+      const distancia = (route.distance / 1000).toFixed(2);
+      const valor = parseFloat(document.getElementById('valor').value) || 6.46;
+
+      document.getElementById('resultado').innerText =
+  `Distância: ${distancia} km | Valor: R$ ${calcularCusto(distancia)} | Tempo: ${tempo} min`;
+      document.getElementById('calculo-info').innerText =
+        `Fórmula: (Distância / 10) * Valor. Resultado: (${distancia} / 10) * R$ ${valor.toFixed(2)} = R$ ${calcularCusto(distancia)}`;
+    } catch (err) {
+      alert(`❌ Erro ao calcular a rota: ${err.message}`);
+    }
+  }
+
+  function calcularCusto(distancia) {
+    const valor = parseFloat(document.getElementById('valor').value) || 6.46;
+    return ((distancia / 10) * valor).toFixed(2);
+  }
+
+  async function geocodificar(endereco) {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.length === 0) throw new Error(`Não foi possível encontrar o endereço: ${endereco}`);
+    return [data[0].lon, data[0].lat];
+  }
+  async function salvarEmArquivo() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const operadorSelect = document.getElementById("operador");
+  const operadorNome = operadorSelect.options[operadorSelect.selectedIndex]?.text || "Não informado";
+  const segundoOperadorSelect = document.getElementById("segundoOperador");
+  const segundoOperadorNome = segundoOperadorSelect.options[segundoOperadorSelect.selectedIndex]?.text || "Não informado";
+  const sedeSelect = document.getElementById("sede");
+  const sedeNome = sedeSelect.options[sedeSelect.selectedIndex]?.text || "Não informado";
+  const dataAtual = new Date().toLocaleDateString("pt-BR");
+
+  const destinos = Array.from(document.querySelectorAll(".destino")).map((el, i) => {
+    const input = el.querySelector("input")?.value.trim();
+    const tag = el.querySelector(".tag-identificacao")?.innerText || "";
+    let label = "";
+    if (tag.includes("Origem")) label = `Operador (${operadorNome})`;
+    else if (tag.includes("Segundo Operador")) label = `Segundo Operador (${segundoOperadorNome})`;
+    else if (tag.includes("Sede")) label = `Sede (${sedeNome})`;
+    else label = "Parada/Outro";
+    return `${i + 1}. ${input} [${label}]`;
+  }).filter(val => val !== "");
+
+  const resumoRota = document.getElementById("resultado").innerText || "Dados de rota não disponíveis.";
+
+  let y = 10;
+  doc.setFontSize(20);
+  doc.text("Relatório de Rotas", 70, y);
+  y += 10;
+
+  doc.setFontSize(12);
+  doc.text(`Operador: ${operadorNome}`, 10, y);
+  y += 8;
+  doc.text(`Segundo Operador: ${segundoOperadorNome}`, 10, y);
+  y += 8;
+  doc.text(`Sede: ${sedeNome}`, 10, y);
+  y += 8;
+  doc.text(`Data da pesquisa: ${dataAtual}`, 10, y);
+  y += 10;
+
+  doc.setFontSize(12);
+  doc.text("Rotas:", 10, y);
+  y += 8;
+
+  destinos.forEach(destino => {
+    if (y > 280) {
+      doc.addPage();
+      y = 10;
+    }
+    doc.text(destino, 10, y);
+    y += 8;
+  });
+
+  y += 10;
+  doc.setFontSize(12);
+  doc.text("Resumo da Rota:", 8, y);
+  y += 8;
+  doc.text(resumoRota, 8, y);
+
+  doc.save(`rotas_${operadorNome.replace(/\s+/g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
+}
+function carregarHistorico() {
+  const historico = JSON.parse(localStorage.getItem("historicoRotas") || "[]");
+  const lista = document.getElementById("historicoRotas");
+  const filtro = document.getElementById("filtroOperador").value;
+  const operadoresSet = new Set(); // <-- ADICIONADO
+
+  lista.innerHTML = "";
+
+  historico.forEach((item) => {
+    operadoresSet.add(item.operador);
+
+    if (filtro && item.operador !== filtro) return; // <-- MOVIDO PARA DENTRO
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${item.operador}</strong> (${item.data})<br>
+      ${item.destinos.map(d => `📍 ${d}`).join("<br>")}
+      <br><em>${item.resumo}</em>
+      <hr>
+    `;
+    lista.appendChild(li);
+  });
+
+  const selectFiltro = document.getElementById("filtroOperador");
+  const operadorSelecionado = selectFiltro.value;
+
+  // Recria as opções de filtro com os operadores únicos
+  selectFiltro.innerHTML = `<option value="">Todos</option>`;
+  operadoresSet.forEach(op => {
+    const opt = document.createElement("option");
+    opt.value = op;
+    opt.textContent = op;
+    selectFiltro.appendChild(opt);
+  });
+
+  selectFiltro.value = operadorSelecionado;
+}
+
+function filtrarHistorico() {
+  carregarHistorico();
+}
+window.onload = carregarHistorico;
+</script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel Kanban Moderno</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #4caf50;
+        --accent: #3498db;
+        --danger: #e74c3c;
+        --warning: #f39c12;
+        --light-bg: #f9f9f9;
+        --text: #2c3e50;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to right, #f0f4f8, #ffffff);
+        color: var(--text);
+        padding-bottom: 40px;
+      }
+
+      h1 {
+        text-align: center;
+        margin: 40px 0 20px;
+        font-size: 2.75rem;
+        color: var(--primary);
+      }
+
+      .board-container {
+        .board {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap; /* Isso permite que as colunas se movam para a linha de baixo */
+  justify-content: center;
+}
+      }
+
+      .board {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .column {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        flex: 1;
+        min-width: 300px;
+        max-width: 360px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: transform 0.2s;
+      }
+
+      .column:hover {
+        transform: translateY(-4px);
+      }
+
+      .column h2 {
+        text-align: center;
+        font-size: 1.5rem;
+        color: var(--accent);
+      }
+
+      .task {
+        background: var(--light-bg);
+        padding: 16px;
+        border-left: 6px solid var(--primary);
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s;
+        position: relative;
+        cursor: grab;
+      }
+
+      .task:hover {
+        transform: scale(1.02);
+        background: #eef1f5;
+      }
+
+      .task strong {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .task small {
+        display: block;
+        color: #7f8c8d;
+        margin-top: 4px;
+      }
+
+      .task p {
+        font-size: 0.9rem;
+        color: #555;
+        margin-top: 6px;
+      }
+
+      .task .code {
+        display: inline-block;
+        background-color: var(--warning);
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        margin-top: 8px;
+      }
+
+      .task img,
+      .task a {
+        margin-top: 10px;
+        display: block;
+        max-width: 100%;
+        border-radius: 8px;
+      }
+
+      .delete {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        font-size: 1.25rem;
+        color: var(--danger);
+        cursor: pointer;
+      }
+
+      form {
+        border-top: 1px solid #ddd;
+        padding-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      input,
+      textarea,
+      button {
+        font-family: inherit;
+        padding: 10px;
+        font-size: 0.95rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+
+      button {
+        background-color: var(--primary);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        border: none;
+      }
+
+      button:hover {
+        background-color: #388e3c;
+      }
+
+      .delete-column {
+        background-color: var(--danger);
+      }
+
+      .create-column-btn {
+        margin-top: 24px;
+        padding: 16px;
+        text-align: center;
+        background-color: var(--accent);
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      .create-column-btn:hover {
+        background-color: #2c80b4;
+      }
+
+      .popup {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--danger);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        z-index: 1000;
+        display: none;
+        text-align: center;
+      }
+
+      .popup button {
+        background-color: white;
+        color: var(--danger);
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .popup button:hover {
+        background-color: #f5f5f5;
+      }
+
+      @media (max-width: 768px) {
+        .board {
+          flex-direction: column;
+          align-items: center;
+        }
+        .task-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background-color: #f1f1f1;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.task-list li input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.task-list button {
+  background-color: transparent;
+  border: none;
+  color: var(--danger);
+  font-size: 0.60rem; /* Reduz o tamanho da fonte */
+  cursor: pointer;
+  padding: 2px 2px; /* Tamanho menor do botão */
+  margin-left: 1px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.task-list button:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  transform: scale(1.1);
+}
+
+.task-list button:hover {
+  transform: scale(1.2);
+  color: #c0392b;
+}
+      }
+    </style>
+    <style>
+      body { font-family: Arial, sans-serif; background: #ffffff; padding: 20px; }
+      .container { background: rgb(247, 247, 247); padding: 30px; max-width: 1000px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+      h1, h2 { text-align: center; color: #37b61e; }
+      .form-group { display: flex; flex-wrap: wrap; gap: 20px; }
+      .form-item { flex: 1 1 45%; display: flex; flex-direction: column; }
+      label { font-weight: bold; margin-bottom: 5px; }
+      input, select, textarea { padding: 10px; border: 1px solid #050505; border-radius: 5px; font-size: 15px; }
+      textarea { resize: vertical; }
+      button { background-color: #2E86C1; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+      .valor-destaque { background: #dff0d8; color: #155724; padding: 15px; border-radius: 6px; font-size: 22px; text-align: center; margin-top: 20px; }
+      .resultado, #historicoContainer { margin-top: 20px; }
+      .resultado table, #historicoContainer table { width: 100%; border-collapse: collapse; background: white; }
+      table td, table th { padding: 10px; border: 1px solid #ffffff; text-align: center; }
+      th { background: #fffcfc; }
+    </style>
+  </head>
+  <body>
+  <h1>Demandas</h1>
+
+  <!-- Pop-up de Lembrete -->
+  <div id="popup" class="popup">
+    <p><strong>Atenção!</strong> O prazo da tarefa com código <span id="task-code"></span> expirou!</p>
+    <button onclick="closePopup()">Fechar</button>
+  </div>
+
+  <!-- Container para o painel e o botão de criar nova etapa -->
+  <div class="board-container" id="board-container">
+    <div class="board" id="board">
+      <!-- Colunas de exemplo -->
+      <div class="column" id="todo" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h2>
+            A Fazer <span class="task-count" id="count-todo">(0)</span>
+            <button onclick="editColumnTitle('todo')" style="margin-left: 10px; font-size: 0.8rem;">✏️</button>
+          </h2>
+                            
+        <form onsubmit="addTask(event, 'todo')">
+          <label for="desc-todo">Descrição</label>
+          <input type="text" placeholder="Descrição" required id="desc-todo">
+          <label for="details-todo">Detalhes da tarefa</label>
+          <textarea placeholder="Detalhes da tarefa" id="details-todo"></textarea>
+          <label for="date-todo">Data de Início</label>
+          <input type="date" required id="date-todo">
+          <label for="deadline-todo">Prazo de Finalização</label>
+          <input type="date" required id="deadline-todo">
+          <label for="file-todo">Anexar Imagem ou PDF</label>
+          <input type="file" id="file-todo" accept="image/*,application/pdf">
+          <label for="list-todo">Adicionar Tarefa à Lista</label>
+          <input type="text" id="list-item-todo" placeholder="Novo item para a lista">
+          <button type="submit">Adicionar</button>
+        </form>
+        <div class="tasks-container" id="tasks-todo"></div>
+      </div>
+      <!-- Coluna "Em Progresso" -->
+      <div class="column" id="doing" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h2>
+            Em Progresso <span class="task-count" id="count-doing">(0)</span>
+            <button onclick="editColumnTitle('doing')" style="margin-left: 10px; font-size: 0.8rem;">✏️</button>
+          </h2>                   
+        <form onsubmit="addTask(event, 'doing')">
+          <label for="desc-doing">Descrição</label>
+          <input type="text" placeholder="Descrição" required id="desc-doing">
+          <label for="details-doing">Detalhes da tarefa</label>
+          <textarea placeholder="Detalhes da tarefa" id="details-doing"></textarea>
+          <label for="date-doing">Data de Início</label>
+          <input type="date" required id="date-doing">
+          <label for="deadline-doing">Prazo de Finalização</label>
+          <input type="date" required id="deadline-doing">
+          <label for="file-doing">Anexar Imagem ou PDF</label>
+          <input type="file" id="file-doing" accept="image/*,application/pdf">
+          <label for="list-doing">Adicionar Tarefa à Lista</label>
+          <input type="text" id="list-item-doing" placeholder="Novo item para a lista">
+          <button type="submit">Adicionar</button>
+        </form>
+        <div class="tasks-container" id="tasks-doing"></div>
+      </div>
+    </div>
+
+    <!-- Botão de Criar Nova Etapa -->
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 24px;">
+        <div class="create-column-btn" onclick="createColumn()">Criar Nova Etapa</div>
+        <div class="create-column-btn" style="background-color: #2ecc71;" onclick="exportToExcel()">Exportar para Excel</div>
+      </div>      
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.task').forEach(task => {
+    task.addEventListener('dragstart', drag);
+  });
+});
+    let taskIdCounter = 0;
+  
+    function addTask(event, columnId) {
+      event.preventDefault();
+      const descInput = document.getElementById(`desc-${columnId}`);
+      const dateInput = document.getElementById(`date-${columnId}`);
+      const deadlineInput = document.getElementById(`deadline-${columnId}`);
+      const detailsInput = document.getElementById(`details-${columnId}`);
+      const fileInput = document.getElementById(`file-${columnId}`);
+      const listItemInput = document.getElementById(`list-item-${columnId}`);
+      
+      const taskCode = `T${taskIdCounter++}`;
+      const task = document.createElement('div');
+      task.className = 'task';
+      task.draggable = true;
+      task.ondragstart = drag;
+      task.id = `task-${taskCode}`;
+      task.ondragstart = drag;
+      task.addEventListener('dragstart', drag);
+  
+      let filePreview = '';
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.type.startsWith('image/')) {
+          filePreview = `<img src="${URL.createObjectURL(file)}" alt="Anexo" style="width: 100%; max-height: 200px; object-fit: contain;">`;
+        } else if (file.type === 'application/pdf') {
+          filePreview = `<a href="${URL.createObjectURL(file)}" target="_blank">Abrir PDF</a>`;
+        }
+      }
+  
+      let listItem = '';
+      if (listItemInput.value) {
+        const listId = `list-${taskCode}`;
+        listItem = `
+          <ul class="task-list" id="${listId}">
+            <li>
+              <input type="checkbox" />
+              <span>${listItemInput.value}</span>
+              <button onclick="removeListItem(this)">❌</button>
+            </li>
+          </ul>
+          <div>
+            <input type="text" placeholder="Novo item da lista" id="subitem-${taskCode}" />
+            <button type="button" onclick="addListItem('${taskCode}')">+ Adicionar Item</button>
+          </div>
+        `;
+      }
+  
+      task.innerHTML = `
+        <span class="delete" onclick="removeTask(this, '${columnId}')">&times;</span>
+        <strong>${descInput.value}</strong>
+        <small>Início: ${formatDateBR(dateInput.value)}</small>
+        <small>Final: ${formatDateBR(deadlineInput.value)}</small>
+        <p>${detailsInput.value}</p>
+        <p class="code">Código: ${taskCode}</p>
+        ${filePreview}
+        ${listItem}
+      `;
+  
+      document.getElementById(`tasks-${columnId}`).appendChild(task);
+  
+      checkTaskDeadline(taskCode, deadlineInput.value);
+  
+      descInput.value = '';
+      dateInput.value = '';
+      deadlineInput.value = '';
+      detailsInput.value = '';
+      fileInput.value = '';
+      listItemInput.value = '';
+  
+      updateTaskCount(columnId);
+    }
+  
+    function updateTaskCount(columnId) {
+      const count = document.querySelectorAll(`#tasks-${columnId} .task`).length;
+      const countSpan = document.getElementById(`count-${columnId}`);
+      if (countSpan) {
+        countSpan.textContent = `(${count})`;
+      }
+      
+    }
+  
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+  
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.id);
+    }
+  
+    function drop(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text");
+      const task = document.getElementById(data);
+      const oldColumnId = task.parentElement.id.replace('tasks-', '');
+      const column = ev.target.closest('.column');
+      const newColumnId = column.id;
+      const tasksContainer = column.querySelector('.tasks-container');
+      if (task && tasksContainer) {
+        tasksContainer.appendChild(task);
+        updateTaskCount(oldColumnId);
+        updateTaskCount(newColumnId);
+      }
+    }
+  
+    function createColumn() {
+  const columnName = prompt("Digite o nome da nova etapa:");
+  if (columnName) {
+    const columnId = columnName.toLowerCase().replace(/\s+/g, '-');
+    const board = document.getElementById('board');
+  
+    const newColumn = document.createElement('div');
+    newColumn.className = 'column';
+    newColumn.id = columnId;
+    newColumn.setAttribute('ondrop', 'drop(event)');
+    newColumn.setAttribute('ondragover', 'allowDrop(event)');
+  
+    newColumn.innerHTML = `
+      <h2>
+        ${columnName} <span class="task-count" id="count-${columnId}">(0)</span>
+        <button onclick="editColumnTitle('${columnId}')" style="margin-left: 10px; font-size: 0.8rem;">✏️</button>
+      </h2>
+      <form onsubmit="addTask(event, '${columnId}')">
+        <label for="desc-${columnId}">Descrição</label>
+        <input type="text" required id="desc-${columnId}">
+        <label for="details-${columnId}">Detalhes</label>
+        <textarea id="details-${columnId}"></textarea>
+        <label for="date-${columnId}">Início</label>
+        <input type="date" required id="date-${columnId}">
+        <label for="deadline-${columnId}">Prazo</label>
+        <input type="date" required id="deadline-${columnId}">
+        <label for="file-${columnId}">Arquivo</label>
+        <input type="file" id="file-${columnId}" accept="image/*,application/pdf">
+        <label for="list-item-${columnId}">Item de Lista</label>
+        <input type="text" id="list-item-${columnId}" placeholder="Novo item para a lista">
+        <button type="submit">Adicionar</button>
+      </form>
+      <div class="tasks-container" id="tasks-${columnId}"></div>
+      <button class="delete-column" onclick="deleteColumn('${columnId}')">Deletar Etapa</button>
+    `;
+    board.appendChild(newColumn);
+    updateTaskCount(columnId);
+  }
+}
+    function deleteColumn(columnId) {
+      const column = document.getElementById(columnId);
+      if (column) {
+        column.remove();
+      }
+    }
+  
+    function checkTaskDeadline(taskCode, deadline) {
+      const currentDate = new Date();
+      const deadlineDate = new Date(deadline);
+      if (deadlineDate < currentDate) {
+        document.getElementById("popup").style.display = "block";
+        document.getElementById("task-code").textContent = taskCode;
+      }
+    }
+  
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+  
+    function editColumnTitle(columnId) {
+      const column = document.getElementById(columnId);
+      const h2 = column.querySelector("h2");
+      const span = h2.querySelector("span");
+      const btn = h2.querySelector("button");
+  
+      const newTitle = prompt("Editar nome da etapa:", h2.childNodes[0].textContent.trim());
+      if (newTitle) {
+        h2.childNodes[0].textContent = `${newTitle} `;
+        h2.appendChild(span);
+        h2.appendChild(btn);
+      }
+    }
+  
+    function addListItem(taskCode) {
+      const list = document.getElementById(`list-${taskCode}`);
+      const input = document.getElementById(`subitem-${taskCode}`);
+      if (input && input.value.trim() !== '') {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <input type="checkbox" />
+          <span>${input.value}</span>
+          <button onclick="removeListItem(this)">❌</button>
+        `;
+        list.appendChild(li);
+        input.value = '';
+      }
+    }
+  
+    function removeListItem(button) {
+      const li = button.parentElement;
+      li.remove();
+    }
+    function removeTask(btn, columnId) {
+  const task = btn.closest('.task');
+  if (task) {
+    task.remove();
+    updateTaskCount(columnId);
+  }
+}
+
+function formatDateBR(dateStr) {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+function exportToExcel() {
+  const columns = document.querySelectorAll('.column');
+  const data = [];
+
+  columns.forEach(col => {
+    const columnName = col.querySelector('h2').childNodes[0].textContent.trim();
+    const tasks = col.querySelectorAll('.task');
+
+    tasks.forEach(task => {
+      const desc = task.querySelector('strong')?.textContent || '';
+      const inicio = task.querySelectorAll('small')[0]?.textContent.replace('Início: ', '') || '';
+      const prazo = task.querySelectorAll('small')[1]?.textContent.replace('Final: ', '') || '';
+      const detalhes = task.querySelector('p')?.textContent || '';
+      const codigo = task.querySelector('.code')?.textContent.replace('Código: ', '') || '';
+
+      data.push({
+        'Etapa': columnName,
+        'Código da Tarefa': codigo,
+        'Descrição': desc,
+        'Detalhes': detalhes,
+        'Data de Início': inicio,
+        'Prazo de Entrega': prazo
+      });
+    });
+  });
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Kanban");
+
+  XLSX.writeFile(workbook, "kanban-tarefas.xlsx");
+}
+  </script>
+    
+</body>
+</html>

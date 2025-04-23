@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Controle de Erros - AFT Química</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary: #2E86C1;
+      --danger: #E74C3C;
+      --success: #28B463;
+      --gray: #F2F2F2;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--primary);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+    }
+    #logo {
+      max-width: 100px;
+      height: auto;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(231, 54, 54, 0.05);
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    .form-col {
+      flex: 1;
+      min-width: 250px;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 6px;
+      display: block;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+    }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-primary { background-color: var(--primary); }
+    .btn-danger  { background-color: var(--danger); }
+    .btn-success { background-color: var(--success); }
+    .btn-gray    { background-color: #888; }
+    .btn-secondary { background-color: #5A5A5A; }
+    .btn:hover { opacity: 0.9; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th {
+      background-color: var(--primary);
+      color: white;
+      padding: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    td { padding: 10px; border-bottom: 1px solid #ddd; }
+    #campoOutro { display: none; }
+    /* Estilo para área de resumo */
+    #resumo {
+      margin-top: 20px;
+      padding: 10px;
+      background: #eef;
+      border-radius: 8px;
+    }
+    /* Estilo extra para a tabela de resumo */
+    #resumo table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+    }
+    #resumo th, #resumo td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .form-col { min-width: 100%; }
+    }
+  </style>
+    <style>
+      body { font-family: Arial, sans-serif; background: #ffffff; padding: 20px; }
+      .container { background: rgb(247, 247, 247); padding: 30px; max-width: 1000px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+      h1, h2 { text-align: center; color: #37b61e; }
+      .form-group { display: flex; flex-wrap: wrap; gap: 20px; }
+      .form-item { flex: 1 1 45%; display: flex; flex-direction: column; }
+      label { font-weight: bold; margin-bottom: 5px; }
+      input, select, textarea { padding: 10px; border: 1px solid #000000; border-radius: 5px; font-size: 15px; }
+      textarea { resize: vertical; }
+      button { background-color: #67d320; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+      .valor-destaque { background: #dff0d8; color: #000000; padding: 15px; border-radius: 6px; font-size: 22px; text-align: center; margin-top: 20px; }
+      .resultado, #historicoContainer { margin-top: 20px; }
+      .resultado table, #historicoContainer table { width: 100%; border-collapse: collapse; background: white; }
+      table td, table th { padding: 10px; border: 1px solid #000000; text-align: center; }
+      th { background: #141414; }
+    </style>
+</head>
+<body>
+
+<h1>
+  CONTROLE DE ERROS
+</h1>
+
+<!-- Formulário de cadastro -->
+<div class="card">
+  <div class="form-row">
+    <div class="form-col">
+      <label>👷 Operador:</label>
+      <select id="operador">
+        <option value="">Selecione um operador</option>
+        <option value="Amailson Gawlinski">Amailson Gawlinski</option>
+        <option value="Caio José">Caio José</option>
+        <option value="Daniel Rodrigo">Daniel Rodrigo</option>
+        <option value="George Gonçalves">George Gonçalves</option>
+        <option value="Igor Nascimento">Igor Nascimento</option>
+        <option value="Lissandro da Silva">Lissandro da Silva</option>
+        <option value="Patrick Darlan">Patrick Darlan</option>
+        <option value="Ricardo Alves">Ricardo Alves</option>
+      </select>
+    </div>
+    <div class="form-col">
+      <label>❌ Erro:</label>
+      <!-- Opção "SEM ERROS" adicionada e demais opções fixas -->
+      <select id="erro">
+        <option value="SEM ERROS">SEM ERROS</option>
+        <option value="Não avisou o atraso com 30 min. De antecedência">Não avisou o atraso com 30 min. De antecedência</option>
+        <option value="Chegou atrasado na empresa">Chegou atrasado na empresa</option>
+        <option value="Não usou o produto certo no serviço">Não usou o produto certo no serviço</option>
+        <option value="Não tirou a foto do antes e depois">Não tirou a foto do antes e depois</option>
+        <option value="Não tirou a foto da tampa da caixa">Não tirou a foto da tampa da caixa</option>
+        <option value="Não abriu e fechou a os no horário certo">Não abriu e fechou a os no horário certo</option>
+        <option value="Lanço errado a quantidade de produto no sistema">Lanço errado a quantidade de produto no sistema</option>
+        <option value="Não lançou o produto no sistema">Não lançou o produto no sistema</option>
+        <option value="Teve retrabalho de Expugos">Teve retrabalho de Expugos</option>
+        <option value="Teve retrabalho de Limpezas">Teve retrabalho de Limpezas</option>
+        <option value="Teve retrabalho de dedetização ou desratização">Teve retrabalho de dedetização ou desratização</option>
+        <option value="Teve reclamação do cliente">Teve reclamação do cliente</option>
+        <option value="Não está uniformizado">Não está uniformizado</option>
+        <option value="Não usa EPI adequadamente">Não usa EPI adequadamente</option>
+        <option value="Não cobrou ou não colocou o comprovante de pg no grupo">Não cobrou ou não colocou o comprovante de pg no grupo</option>
+        <option value="Não registrou corertamente a não conformidade">Não registrou corertamente a não conformidade</option>
+        <option value="Não registro na planilha os parametros da piscina">Não registro na planilha os parametros da piscina</option>
+        <option value="Não registrou corretamente o carro no app">Não registrou corretamente o carro no app</option>
+        <option value="Não coletou assinatura no app">Não coletou assinatura no app</option>
+        <option value="Lançou produto errado">Lançou produto errado</option>
+      </select>
+    </div>
+    <div class="form-col">
+      <label>📅 Data:</label>
+      <input type="date" id="data">
+    </div>
+    <div class="form-col">
+      <label>🔁 Repetido:</label>
+      <select id="repetido">
+        <option value="Sim">Sim</option>
+        <option value="Não">Não</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <!-- Campo para marcação específica de erro -->
+    <div class="form-col">
+      <label>Marca de Erro Específico:</label>
+      <input type="text" id="marcaErro" placeholder="Informe uma marcação específica (opcional)">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-col">
+      <label>✔️ Correção:</label>
+      <select id="correcao">
+        <option value="">Selecione uma correção</option>
+        <option value="Treinamento aplicado">Treinamento aplicado</option>
+        <option value="Advertência verbal">Advertência verbal</option>
+        <option value="Refazer tarefa com supervisão">Refazer tarefa com supervisão</option>
+        <option value="Reunião com gestor">Reunião com gestor</option>
+        <option value="Outro">Outro</option>
+      </select>
+      <input type="text" id="campoOutro" placeholder="Descreva a correção personalizada">
+    </div>
+    <div class="form-col">
+      <label>📝 Observações:</label>
+      <textarea id="obs" rows="3"></textarea>
+    </div>
+  </div>
+  <div class="form-row">
+    <button class="btn btn-success" onclick="adicionarErro()">➕ Adicionar</button>
+    <!-- Botões de exportação -->
+    <button class="btn btn-primary" onclick="exportarPDFFiltro()">📄 Exportar PDF (Filtro)</button>
+    <button class="btn btn-secondary" onclick="exportarPDFCompleto()">📄 Exportar PDF (Completo)</button>
+    <button class="btn btn-danger" onclick="limparRegistros()">🧹 Limpar Tudo</button>
+  </div>
+</div>
+
+<!-- Filtros -->
+<div class="card">
+  <h3>🔍 Filtros</h3>
+  <div class="form-row">
+    <div class="form-col">
+      <select id="filtroOperador">
+        <option value="Todos">TODOS os operadores</option>
+      </select>
+    </div>
+    <div class="form-col">
+      <input type="date" id="filtroDataInicio">
+    </div>
+    <div class="form-col">
+      <input type="date" id="filtroDataFim">
+    </div>
+    <div class="form-col">
+      <button class="btn btn-primary" onclick="filtrarErros()">Aplicar Filtros</button>
+      <!-- Mantém o operador selecionado ao limpar datas -->
+      <button class="btn btn-gray" onclick="limparDataFiltros()">Limpar Datas</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tabela de registros -->
+<table id="tabelaErros">
+  <thead>
+    <tr>
+      <th>Operador</th>
+      <th>Erro</th>
+      <th>Marca Erro</th>
+      <th>Data</th>
+      <th>Repetido</th>
+      <th>Correção</th>
+      <th>Obs</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Resumo dos valores -->
+<div id="resumo" class="card">
+  <h3>📈 Resumo dos Valores</h3>
+  <div id="resumoConteudo"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+<script>
+  let registros = [];
+  // Tabela de deduções (valores em reais)
+  const deducoes = {
+    "Não avisou o atraso com 30 min. De antecedência": 25,
+    "Chegou atrasado na empresa": 25,
+    "Não usou o produto certo no serviço": 50,
+    "Não tirou a foto do antes e depois": 25,
+    "Não tirou a foto da tampa da caixa": 25,
+    "Não abriu e fechou a os no horário certo": 25,
+    "Lanço errado a quantidade de produto no sistema": 25,
+    "Não lançou o produto no sistema": 50,
+    "Teve retrabalho de Expugos": 100,
+    "Teve retrabalho de Limpezas": 50,
+    "Teve retrabalho de dedetização ou desratização": 50,
+    "Teve reclamação do cliente": 50,
+    "Não está uniformizado": 25,
+    "Não usa EPI adequadamente": 50,
+    "Não cobrou ou não colocou o comprovante de pg no grupo": 25,
+    "Não registrou corertamente a não conformidade": 25,
+    "Não registro na planilha os parametros da piscina": 25,
+    "Não registrou corretamente o carro no app": 25,
+    "Não coletou assinatura no app": 25,
+    "Lançou produto errado": 25
+  };
+  // Cada operador inicia com R$ 300,00
+  const baseValor = 300;
+
+  window.onload = () => {
+    const salvos = localStorage.getItem("registrosErros");
+    if (salvos) {
+      registros = JSON.parse(salvos);
+      atualizarTabela(registros);
+    }
+    atualizarFiltroOperadores();
+  };
+
+  function salvarLocal() {
+    localStorage.setItem("registrosErros", JSON.stringify(registros));
+  }
+
+  // Atualiza a tabela e o resumo com base na lista passada
+  function atualizarTabela(lista = registros) {
+    const tbody = document.querySelector("#tabelaErros tbody");
+    tbody.innerHTML = "";
+    lista.forEach(r => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${r.operador}</td>
+          <td>${r.erro}</td>
+          <td>${r.marcaErro || ""}</td>
+          <td>${formatarDataBR(r.data)}</td>
+          <td>${r.repetido}</td>
+          <td>${r.correcao}</td>
+          <td>${r.obs}</td>
+        </tr>`;
+    });
+    atualizarFiltroOperadores();
+    atualizarResumo(lista);
+  }
+
+  function atualizarFiltroOperadores() {
+    const selectFiltro = document.getElementById("filtroOperador");
+    const operadoresUnicos = [...new Set(registros.map(r => r.operador))].sort();
+    selectFiltro.innerHTML = `<option value="Todos">TODOS os operadores</option>`;
+    operadoresUnicos.forEach(op => {
+      const opt = document.createElement("option");
+      opt.value = op;
+      opt.textContent = op;
+      selectFiltro.appendChild(opt);
+    });
+  }
+
+  function formatarDataBR(dataISO) {
+    const [ano, mes, dia] = dataISO.split("-");
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  function adicionarErro() {
+    const operador = document.getElementById("operador").value;
+    const erro = document.getElementById("erro").value;
+    const data = document.getElementById("data").value;
+    const repetido = document.getElementById("repetido").value;
+    let correcao = document.getElementById("correcao").value;
+    const campoOutro = document.getElementById("campoOutro");
+    if (correcao === "Outro" && campoOutro.value.trim()) {
+      correcao = campoOutro.value.trim();
+    }
+    const obs = document.getElementById("obs").value.trim();
+    const marcaErro = document.getElementById("marcaErro").value.trim();
+
+    if (!operador || !erro || !data || !correcao) {
+      alert("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    registros.push({ operador, erro, data, repetido, correcao, obs, marcaErro });
+    salvarLocal();
+    atualizarTabela(registros);
+  }
+
+  document.getElementById("correcao").addEventListener("change", function () {
+    document.getElementById("campoOutro").style.display = this.value === "Outro" ? "block" : "none";
+  });
+
+  function limparRegistros() {
+    if (confirm("Apagar todos os registros?")) {
+      registros = [];
+      localStorage.removeItem("registrosErros");
+      atualizarTabela([]);
+    }
+  }
+
+  function limparDataFiltros() {
+    document.getElementById("filtroDataInicio").value = "";
+    document.getElementById("filtroDataFim").value = "";
+    filtrarErros();
+  }
+
+  function filtrarErros() {
+    const filtroOperador = document.getElementById("filtroOperador").value;
+    const inicio = document.getElementById("filtroDataInicio").value;
+    const fim = document.getElementById("filtroDataFim").value;
+    let filtrados = registros;
+    if (filtroOperador !== "Todos") {
+      filtrados = filtrados.filter(r => r.operador === filtroOperador);
+    }
+    filtrados = filtrados.filter(r => (!inicio || r.data >= inicio) && (!fim || r.data <= fim));
+    atualizarTabela(filtrados);
+  }
+
+  // Atualiza o resumo exibido na página
+  function atualizarResumo(lista = registros) {
+    const resumoOp = {};
+    lista.forEach(r => {
+      const op = r.operador;
+      if (!resumoOp[op]) {
+        resumoOp[op] = { totalErros: 0, desconto: 0 };
+      }
+      resumoOp[op].totalErros++;
+      // Se o erro for "SEM ERROS" nenhum desconto é aplicado
+      if (r.erro !== "SEM ERROS" && deducoes[r.erro] !== undefined) {
+        resumoOp[op].desconto += deducoes[r.erro];
+      }
+    });
+    for (let op in resumoOp) {
+      resumoOp[op].valorFinal = Math.max(0, baseValor - resumoOp[op].desconto);
+    }
+    // Monta o HTML do resumo com alinhamento centralizado e linhas definidas
+    let html = "<h4>Resumo por Operador</h4>";
+    html += `<table>
+      <thead>
+        <tr style="background-color: var(--primary); color: white;">
+          <th>Operador</th>
+          <th>Total de Erros</th>
+          <th>Total Descontado (R$)</th>
+          <th>Valor Final (R$)</th>
+        </tr>
+      </thead>
+      <tbody>`;
+    for (let op in resumoOp) {
+      const item = resumoOp[op];
+      html += `<tr>
+        <td>${op}</td>
+        <td>${item.totalErros}</td>
+        <td>${item.desconto.toFixed(2)}</td>
+        <td style="font-weight: bold; color: var(--success);">R$ ${item.valorFinal.toFixed(2)}</td>
+      </tr>`;
+    }
+    html += "</tbody></table>";
+
+    // Se houver filtro por data, acrescenta o resumo dos erros cometidos
+    const inicio = document.getElementById("filtroDataInicio").value;
+    const fim = document.getElementById("filtroDataFim").value;
+    if (inicio || fim) {
+      const resumoErros = {};
+      lista.forEach(r => {
+        const erro = r.erro;
+        if (!resumoErros[erro]) {
+          resumoErros[erro] = 0;
+        }
+        resumoErros[erro]++;
+      });
+      html += "<h4 style='margin-top:20px;'>Resumo de Erros Cometidos</h4>";
+      html += `<table>
+        <thead>
+          <tr style="background-color: var(--primary); color: white;">
+            <th>Erro</th>
+            <th>Quantidade</th>
+          </tr>
+        </thead>
+        <tbody>`;
+      for (let erro in resumoErros) {
+        html += `<tr>
+          <td>${erro}</td>
+          <td>${resumoErros[erro]}</td>
+        </tr>`;
+      }
+      html += "</tbody></table>";
+    }
+    document.getElementById("resumoConteudo").innerHTML = html;
+  }
+
+  // Exportação em PDF (Filtro e Completo)
+  async function exportarPDFFiltro() {
+    const filtroOperador = document.getElementById("filtroOperador").value;
+    if (filtroOperador === "Todos") {
+      alert("Selecione um operador específico para exportar o PDF filtrado.");
+      return;
+    }
+    const inicio = document.getElementById("filtroDataInicio").value;
+    const fim = document.getElementById("filtroDataFim").value;
+    const dados = registros.filter(r => {
+      return r.operador === filtroOperador &&
+             (!inicio || r.data >= inicio) &&
+             (!fim || r.data <= fim);
+    });
+    gerarPDF(dados, `Relatório de Erros (${filtroOperador})`);
+  }
+
+  async function exportarPDFCompleto() {
+    gerarPDF(registros, "Relatório de Erros (Completo)");
+  }
+
+  async function gerarPDF(dados, titulo) {
+    if (!dados.length) {
+      alert("Não há registros para exportar.");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text(titulo, 14, 15);
+
+    // Tabela de registros
+    const headers = [["Operador", "Erro", "Marca Erro", "Data", "Repetido", "Correção", "Obs"]];
+    const dataTabela = dados.map(r => {
+      const [ano, mes, dia] = r.data.split("-");
+      const dataBR = `${dia}/${mes}/${ano}`;
+      return [r.operador, r.erro, r.marcaErro || "", dataBR, r.repetido, r.correcao, r.obs];
+    });
+    doc.autoTable({
+      head: headers,
+      body: dataTabela,
+      startY: 25,
+      theme: "striped",
+      headStyles: { fillColor: [46, 134, 193] }
+    });
+
+    // Geração do resumo para PDF
+    const resumoObj = gerarResumoPDF(dados);
+    let resumoPDF = "Resumo dos Valores:\n\n";
+    resumoPDF += "Operador | Erros | Total Descontado (R$) | Valor Final (R$)\n";
+    resumoPDF += "-------------------------------------------------------------\n";
+    for (let op in resumoObj.operadores) {
+      const item = resumoObj.operadores[op];
+      resumoPDF += `${op} | ${item.totalErros} | ${item.desconto.toFixed(2)} | ${item.valorFinal.toFixed(2)}\n`;
+    }
+    if (resumoObj.erros) {
+      resumoPDF += "\nResumo de Erros Cometidos:\n";
+      resumoPDF += "Erro | Quantidade\n";
+      resumoPDF += "--------------------\n";
+      for (let erro in resumoObj.erros) {
+        resumoPDF += `${erro} | ${resumoObj.erros[erro]}\n`;
+      }
+    }
+    doc.addPage();
+    doc.setFontSize(12);
+    doc.text(resumoPDF, 14, 15);
+    
+    doc.save(`${titulo.replace(/\s/g, '_')}.pdf`);
+  }
+  
+  // Função que gera os dados resumo para o PDF
+  function gerarResumoPDF(dados) {
+    const operadores = {};
+    const erros = {};
+    dados.forEach(r => {
+      const op = r.operador;
+      if (!operadores[op]) { operadores[op] = { totalErros: 0, desconto: 0 }; }
+      operadores[op].totalErros++;
+      if (r.erro !== "SEM ERROS" && deducoes[r.erro] !== undefined) {
+        operadores[op].desconto += deducoes[r.erro];
+      }
+      if (!erros[r.erro]) { erros[r.erro] = 0; }
+      erros[r.erro]++;
+    });
+    for (let op in operadores) {
+      operadores[op].valorFinal = Math.max(0, baseValor - operadores[op].desconto);
+    }
+    return { operadores, erros };
+  }
+</script>
+
+</body>
+</html>

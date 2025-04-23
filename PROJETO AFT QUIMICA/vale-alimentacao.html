@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Vale Alimentação</title>
+  <style>
+  * { 
+  box-sizing: border-box; 
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  padding: 40px 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: #ffffff; /* Alterado para branco */
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #222;
+}
+
+.form-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-control, .form-half {
+  flex: 1 1 100%;
+}
+
+.form-half {
+  flex: 1 1 48%;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-calcular {
+  background-color: #28a745;
+  color: #fff;
+  width: 100%;
+}
+
+.btn-exportar,
+.btn-exportar-completo {
+  background-color: #007bff;
+  color: #fff;
+  width: 100%;
+  margin-top: 10px;
+  display: none;
+}
+
+.btn-limpar {
+  background-color: #ff1100;
+  color: #fff;
+  width: 100%;
+  margin-top: 20px;
+  display: none;
+}
+
+.resultado {
+  margin-top: 30px;
+  padding: 20px;
+  background: #e9f7ef;
+  border: 1px solid #2e7d32;
+  border-radius: 8px;
+  display: none;
+}
+
+#calendario {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+  background-color: #ffffff; /* Fundo branco para o calendário */
+}
+
+#calendario div,
+#calendario button {
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  color: #000000; /* Cor do texto preta */
+}
+
+#calendario div {
+  font-weight: bold;
+  background-color: #007bff; /* Fundo azul para os dias da semana */
+  color: #ffffff; /* Letras brancas para os dias da semana */
+}
+
+#calendario button {
+  border: 1px solid #000000;
+  background-color: #ffffff; /* Fundo branco para os botões */
+  color: #000000; /* Cor do texto preta */
+  cursor: pointer;
+}
+
+#calendario button.ativo {
+  background-color: #28a745;
+  color: rgb(252, 252, 252);
+}
+
+#calendario button.feriado {
+  background-color: #ff0019;
+  color: #fff;
+  cursor: not-allowed;
+  font-weight: bold;
+}
+
+#calendario button.feriado-movel {
+  background-color: #ff0019;
+  color: #fff;
+  cursor: not-allowed;
+  font-weight: bold;
+}
+
+#filtroHistorico {
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.btn-excluir {
+  margin-left: 10px;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filtros-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+  padding: 10px;
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filtros-container select,
+.filtros-container input {
+  flex: 1 1 30%;
+  min-width: 150px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: box-shadow 0.3s ease;
+}
+
+.filtros-container select:focus,
+.filtros-container input:focus {
+  box-shadow: 0 0 0 2px #007bff44;
+  outline: none;
+}
+</style>
+<style>
+    body { font-family: Arial, sans-serif; background: #f3f3f3; padding: 20px; }
+    .container { background: rgb(247, 247, 247); padding: 30px; max-width: 1000px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1, h2 { text-align: center; color: #37b61e; }
+    .form-group { display: flex; flex-wrap: wrap; gap: 20px; }
+    .form-item { flex: 1 1 45%; display: flex; flex-direction: column; }
+    label { font-weight: bold; margin-bottom: 5px; }
+    input, select, textarea { padding: 10px; border: 1px solid #050505; border-radius: 5px; font-size: 15px; }
+    textarea { resize: vertical; }
+    button { background-color: #2E86C1; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    .valor-destaque { background: #dff0d8; color: #155724; padding: 15px; border-radius: 6px; font-size: 22px; text-align: center; margin-top: 20px; }
+    .resultado, #historicoContainer { margin-top: 20px; }
+    .resultado table, #historicoContainer table { width: 100%; border-collapse: collapse; background: white; }
+    table td, table th { padding: 10px; border: 1px solid #ffffff; text-align: center; }
+    th { background: #fffcfc; }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>VALE ALIMENTAÇÃO</h1>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-col">
+          <label>👷 Operador:</label>
+          <select id="beneficiario">
+            <option value="">Selecione um operador</option>
+            <option value="Amailson Gawlinski">Amailson Gawlinski</option>
+            <option value="Caio José">Caio José</option>
+            <option value="Daniel Rodrigo">Daniel Rodrigo</option>
+            <option value="George Gonçalves">George Gonçalves</option>
+            <option value="Igor Nascimento">Igor Nascimento</option>
+            <option value="Lissandro da Silva">Lissandro da Silva</option>
+            <option value="Luana Parcianello">Luana Parcianello</option>
+            <option value="Patrick Darlan">Patrick Darlan</option>
+            <option value="Ricardo Alves">Ricardo Alves</option>
+            <option value="Keniel Vasque">Keniel Vasque</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-half">
+          <label for="valorDiario">💵 Valor do Benefício por Dia (R$):</label>
+          <input type="number" id="valorDiario" value="28.00" step="0.01">
+        </div>
+        <div class="form-half">
+          <label for="tipoDesconto">💲 Tipo de Desconto:</label>
+          <select id="tipoDesconto">
+            <option value="percentual">Percentual (%)</option>
+            <option value="fixo">Valor Fixo (R$)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-control">
+          <label for="valorDesconto">🔖 Valor do Desconto:</label>
+          <input type="number" id="valorDesconto" step="0.01" placeholder="Ex: 5 ou 150">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-half">
+          <label for="qtdDescontos4h">⏱️ Trabalhou -4h:</label>
+          <input type="number" id="qtdDescontos4h" min="0" step="1">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-control">
+          <label>📅  Selecione os Dias Trabalhados:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button onclick="mudarMes(-1)">⬅️</button>
+            <input type="month" id="mesSelecionado" onchange="gerarCalendario()">
+            <button onclick="mudarMes(1)">➡️</button>
+          </div>
+          <div id="calendario"></div>
+        </div>
+      </div>
+
+      <button class="btn-calcular" onclick="calcularVA()">CALCULAR</button>
+      <button id="btnExportar" class="btn-exportar" onclick="exportarPDF()">📝 SALVAR CÁLCULO ATUAL</button>
+      <button id="btnExportarCompleto" class="btn-exportar-completo" onclick="exportarPDFCompleto()">💾 SALVAR HISTÓRICO</button>
+      <div id="resultado" class="resultado"></div>
+
+      <div id="historico" class="resultado" style="margin-top: 20px; background: #fffbe6; border-color: #ffc107; display: none;">
+        <h4>📝 Histórico de Cálculos</h4>
+        <input type="text" id="filtroHistorico" placeholder="Filtrar por nome" oninput="filtrarHistorico()">
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <!-- Campo de seleção de mês -->
+            <select id="filtroMesHistorico" onchange="filtrarPorDataHistorico()">
+              <option value="">🗓️</option>
+              <option value="0">Janeiro</option>
+              <option value="1">Fevereiro</option>
+              <option value="2">Março</option>
+              <option value="3">Abril</option>
+              <option value="4">Maio</option>
+              <option value="5">Junho</option>
+              <option value="6">Julho</option>
+              <option value="7">Agosto</option>
+              <option value="8">Setembro</option>
+              <option value="9">Outubro</option>
+              <option value="10">Novembro</option>
+              <option value="11">Dezembro</option>
+            </select>
+          
+            <!-- Campo de seleção de ano -->
+            <select id="filtroAnoHistorico" onchange="filtrarPorDataHistorico()">
+              <option value="">🗓️</option>
+              <script>
+                const anoAtual = new Date().getFullYear();
+                for (let i = anoAtual - 5; i <= anoAtual + 5; i++) {
+                  document.write(`<option value="${i}">${i}</option>`);
+                }
+              </script>
+            </select>
+          </div>
+        
+        <ul id="listaHistorico" style="padding-left: 20px;"></ul>
+      </div>
+    </div>
+
+    <button class="btn-limpar" onclick="limparCampos()">⚠️ LIMPAR</button>
+  </div>
+
+  <script>
+    let historicoVA = [];
+    let diasMarcados = {};
+
+    function gerarCalendario() {
+      const mesSelecionado = document.getElementById('mesSelecionado').value;
+      const [ano, mes] = mesSelecionado.split('-').map(Number);
+      const calendario = document.getElementById('calendario');
+      calendario.innerHTML = '';
+
+      const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      diasSemana.forEach(dia => {
+        const diaSemana = document.createElement('div');
+        diaSemana.textContent = dia;
+        calendario.appendChild(diaSemana);
+      });
+
+      const primeiroDia = new Date(ano, mes - 1, 1).getDay();
+      const diasNoMes = new Date(ano, mes, 0).getDate();
+      const diasTrabalhados = diasMarcados[mesSelecionado] || [];
+
+      const feriadosFixos = [
+        { dia: 1, mes: 1 }, { dia: 21, mes: 4 }, { dia: 1, mes: 5 },
+        { dia: 7, mes: 9 }, { dia: 12, mes: 10 }, { dia: 2, mes: 11 },
+        { dia: 15, mes: 11 }, { dia: 25, mes: 12 }
+      ];
+      const feriadosMoveis = {
+    "2025-02-28": "Sexta-feira de Carnaval",
+    "2025-03-03": "Segunda-feira de Carnaval",
+    "2025-03-04": "Terça-feira de Carnaval",
+    "2025-03-05": "Quarta-feira de Cinzas",
+    "2025-04-18": "Sexta-feira Santa",
+    "2025-06-19": "Corpus Christi",
+
+    "2026-02-13": "Sexta-feira de Carnaval",
+    "2026-02-16": "Segunda-feira de Carnaval",
+    "2026-02-17": "Terça-feira de Carnaval",
+    "2026-02-18": "Quarta-feira de Cinzas",
+    "2026-04-03": "Sexta-feira Santa",
+    "2026-06-04": "Corpus Christi",
+
+    "2027-02-05": "Sexta-feira de Carnaval",
+    "2027-02-08": "Segunda-feira de Carnaval",
+    "2027-02-09": "Terça-feira de Carnaval",
+    "2027-02-10": "Quarta-feira de Cinzas",
+    "2027-03-26": "Sexta-feira Santa",
+    "2027-05-27": "Corpus Christi",
+
+    "2028-02-25": "Sexta-feira de Carnaval",
+    "2028-02-28": "Segunda-feira de Carnaval",
+    "2028-02-29": "Terça-feira de Carnaval",
+    "2028-03-01": "Quarta-feira de Cinzas",
+    "2028-04-14": "Sexta-feira Santa",
+    "2028-06-15": "Corpus Christi",
+
+    "2029-02-09": "Sexta-feira de Carnaval",
+    "2029-02-12": "Segunda-feira de Carnaval",
+    "2029-02-13": "Terça-feira de Carnaval",
+    "2029-02-14": "Quarta-feira de Cinzas",
+    "2029-03-30": "Sexta-feira Santa",
+    "2029-05-31": "Corpus Christi",
+
+    "2030-03-01": "Sexta-feira de Carnaval",
+    "2030-03-04": "Segunda-feira de Carnaval",
+    "2030-03-05": "Terça-feira de Carnaval",
+    "2030-03-06": "Quarta-feira de Cinzas",
+    "2030-04-19": "Sexta-feira Santa",
+    "2030-06-20": "Corpus Christi",
+
+    "2031-02-21": "Sexta-feira de Carnaval",
+    "2031-02-24": "Segunda-feira de Carnaval",
+    "2031-02-25": "Terça-feira de Carnaval",
+    "2031-02-26": "Quarta-feira de Cinzas",
+    "2031-04-11": "Sexta-feira Santa",
+    "2031-06-12": "Corpus Christi",
+
+    "2032-02-06": "Sexta-feira de Carnaval",
+    "2032-02-09": "Segunda-feira de Carnaval",
+    "2032-02-10": "Terça-feira de Carnaval",
+    "2032-02-11": "Quarta-feira de Cinzas",
+    "2032-03-26": "Sexta-feira Santa",
+    "2032-05-27": "Corpus Christi",
+
+    "2033-02-25": "Sexta-feira de Carnaval",
+    "2033-02-28": "Segunda-feira de Carnaval",
+    "2033-03-01": "Terça-feira de Carnaval",
+    "2033-03-02": "Quarta-feira de Cinzas",
+    "2033-04-15": "Sexta-feira Santa",
+    "2033-06-16": "Corpus Christi",
+
+    "2034-02-10": "Sexta-feira de Carnaval",
+    "2034-02-13": "Segunda-feira de Carnaval",
+    "2034-02-14": "Terça-feira de Carnaval",
+    "2034-02-15": "Quarta-feira de Cinzas",
+    "2034-03-31": "Sexta-feira Santa",
+    "2034-06-01": "Corpus Christi",
+
+    "2035-03-02": "Sexta-feira de Carnaval",
+    "2035-03-05": "Segunda-feira de Carnaval",
+    "2035-03-06": "Terça-feira de Carnaval",
+    "2035-03-07": "Quarta-feira de Cinzas",
+    "2035-04-20": "Sexta-feira Santa",
+    "2035-06-21": "Corpus Christi",
+
+    "2036-02-22": "Sexta-feira de Carnaval",
+    "2036-02-25": "Segunda-feira de Carnaval",
+    "2036-02-26": "Terça-feira de Carnaval",
+    "2036-02-27": "Quarta-feira de Cinzas",
+    "2036-04-11": "Sexta-feira Santa",
+    "2036-06-12": "Corpus Christi",
+
+    "2037-02-06": "Sexta-feira de Carnaval",
+    "2037-02-09": "Segunda-feira de Carnaval",
+    "2037-02-10": "Terça-feira de Carnaval",
+    "2037-02-11": "Quarta-feira de Cinzas",
+    "2037-03-27": "Sexta-feira Santa",
+    "2037-05-28": "Corpus Christi",
+
+    "2038-02-26": "Sexta-feira de Carnaval",
+    "2038-03-01": "Segunda-feira de Carnaval",
+    "2038-03-02": "Terça-feira de Carnaval",
+    "2038-03-03": "Quarta-feira de Cinzas",
+    "2038-04-16": "Sexta-feira Santa",
+    "2038-06-17": "Corpus Christi",
+
+    "2039-02-11": "Sexta-feira de Carnaval",
+    "2039-02-14": "Segunda-feira de Carnaval",
+    "2039-02-15": "Terça-feira de Carnaval",
+    "2039-02-16": "Quarta-feira de Cinzas",
+    "2039-04-01": "Sexta-feira Santa",
+    "2039-06-02": "Corpus Christi",
+
+    "2040-03-02": "Sexta-feira de Carnaval",
+    "2040-03-05": "Segunda-feira de Carnaval",
+    "2040-03-06": "Terça-feira de Carnaval",
+    "2040-03-07": "Quarta-feira de Cinzas",
+    "2040-04-20": "Sexta-feira Santa",
+    "2040-06-21": "Corpus Christi",
+
+    "2041-02-15": "Sexta-feira de Carnaval",
+    "2041-02-18": "Segunda-feira de Carnaval",
+    "2041-02-19": "Terça-feira de Carnaval",
+    "2041-02-20": "Quarta-feira de Cinzas",
+    "2041-04-05": "Sexta-feira Santa",
+    "2041-06-06": "Corpus Christi",
+
+    "2042-02-07": "Sexta-feira de Carnaval",
+    "2042-02-10": "Segunda-feira de Carnaval",
+    "2042-02-11": "Terça-feira de Carnaval",
+    "2042-02-12": "Quarta-feira de Cinzas",
+    "2042-03-28": "Sexta-feira Santa",
+    "2042-05-29": "Corpus Christi",
+
+    "2043-02-27": "Sexta-feira de Carnaval",
+    "2043-03-02": "Segunda-feira de Carnaval",
+    "2043-03-03": "Terça-feira de Carnaval",
+    "2043-03-04": "Quarta-feira de Cinzas",
+    "2043-04-17": "Sexta-feira Santa",
+    "2043-06-18": "Corpus Christi",
+
+    "2044-02-12": "Sexta-feira de Carnaval",
+    "2044-02-15": "Segunda-feira de Carnaval",
+    "2044-02-16": "Terça-feira de Carnaval",
+    "2044-02-17": "Quarta-feira de Cinzas",
+    "2044-04-01": "Sexta-feira Santa",
+    "2044-06-02": "Corpus Christi",
+
+    "2045-03-03": "Sexta-feira de Carnaval",
+    "2045-03-06": "Segunda-feira de Carnaval",
+    "2045-03-07": "Terça-feira de Carnaval",
+    "2045-03-08": "Quarta-feira de Cinzas",
+    "2045-04-21": "Sexta-feira Santa",
+    "2045-06-22": "Corpus Christi",
+
+    "2046-02-16": "Sexta-feira de Carnaval",
+    "2046-02-19": "Segunda-feira de Carnaval",
+    "2046-02-20": "Terça-feira de Carnaval",
+    "2046-02-21": "Quarta-feira de Cinzas",
+    "2046-04-06": "Sexta-feira Santa",
+    "2046-06-07": "Corpus Christi",
+
+    "2047-02-08": "Sexta-feira de Carnaval",
+    "2047-02-11": "Segunda-feira de Carnaval",
+    "2047-02-12": "Terça-feira de Carnaval",
+    "2047-02-13": "Quarta-feira de Cinzas",
+    "2047-03-29": "Sexta-feira Santa",
+    "2047-05-30": "Corpus Christi",
+
+    "2048-02-28": "Sexta-feira de Carnaval",
+    "2048-03-02": "Segunda-feira de Carnaval",
+    "2048-03-03": "Terça-feira de Carnaval",
+    "2048-03-04": "Quarta-feira de Cinzas",
+    "2048-04-17": "Sexta-feira Santa",
+    "2048-06-18": "Corpus Christi",
+
+    "2049-02-13": "Sexta-feira de Carnaval",
+    "2049-02-16": "Segunda-feira de Carnaval",
+    "2049-02-17": "Terça-feira de Carnaval",
+    "2049-02-18": "Quarta-feira de Cinzas",
+    "2049-04-02": "Sexta-feira Santa",
+    "2049-06-03": "Corpus Christi",
+
+    "2050-03-04": "Sexta-feira de Carnaval",
+    "2050-03-07": "Segunda-feira de Carnaval",
+    "2050-03-08": "Terça-feira de Carnaval",
+    "2050-03-09": "Quarta-feira de Cinzas",
+    "2050-04-22": "Sexta-feira Santa",
+    "2050-06-23": "Corpus Christi"
+};
+      for (let i = 0; i < primeiroDia; i++) {
+        calendario.appendChild(document.createElement('div'));
+      }
+
+      for (let dia = 1; dia <= diasNoMes; dia++) {
+        const botaoDia = document.createElement('button');
+        botaoDia.textContent = dia;
+
+        const isFeriadoFixo = feriadosFixos.some(f => f.dia === dia && f.mes === mes);
+        const dataFormatada = `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        const isFeriadoMovel = feriadosMoveis[dataFormatada];
+
+        if (isFeriadoFixo) {
+          botaoDia.classList.add('feriado');
+          botaoDia.disabled = true;
+        } else if (isFeriadoMovel) {
+          botaoDia.classList.add('feriado-movel');
+          botaoDia.title = feriadosMoveis[dataFormatada];
+          botaoDia.disabled = true;
+        } else {
+          if (diasTrabalhados.includes(dia)) {
+            botaoDia.classList.add('ativo');
+          }
+          botaoDia.addEventListener('click', () => {
+            if (!diasMarcados[mesSelecionado]) diasMarcados[mesSelecionado] = [];
+            const index = diasMarcados[mesSelecionado].indexOf(dia);
+            if (index > -1) {
+              diasMarcados[mesSelecionado].splice(index, 1);
+              botaoDia.classList.remove('ativo');
+            } else {
+              diasMarcados[mesSelecionado].push(dia);
+              botaoDia.classList.add('ativo');
+            }
+          });
+        }
+
+        calendario.appendChild(botaoDia);
+      }
+    }
+
+    function mudarMes(direcao) {
+      const mesInput = document.getElementById('mesSelecionado');
+      const [ano, mes] = mesInput.value.split('-').map(Number);
+      const novaData = new Date(ano, mes - 1 + direcao, 1);
+      mesInput.value = novaData.toISOString().slice(0, 7);
+      gerarCalendario();
+    }
+
+    function calcularVA() {
+      const nome = document.getElementById('beneficiario').value;
+      const valorDia = parseFloat(document.getElementById('valorDiario').value);
+      const tipoDesconto = document.getElementById('tipoDesconto').value;
+      const valorDesconto = parseFloat(document.getElementById('valorDesconto').value || 0);
+      const qtdDescontos4h = parseInt(document.getElementById('qtdDescontos4h').value || 0);
+      const mesSelecionado = document.getElementById('mesSelecionado').value;
+      const diasTrabalhados = diasMarcados[mesSelecionado] || [];
+
+      if (!nome || isNaN(valorDia)) {
+        alert('Preencha os dados obrigatórios.');
+        return;
+      }
+
+      const diasUteisTrabalhados = diasTrabalhados.length;
+      let total = diasUteisTrabalhados * valorDia;
+
+      if (tipoDesconto === 'percentual') {
+        total *= (1 - valorDesconto / 100);
+      } else {
+        total -= valorDesconto;
+      }
+
+      total -= qtdDescontos4h * valorDia;
+      total = Math.max(0, total);
+
+      const [ano, mes] = mesSelecionado.split('-').map(Number);
+      const data = new Date(ano, mes - 1);
+      const nomeMes = data.toLocaleString('pt-BR', { month: 'long' });
+
+      const resultado = document.getElementById('resultado');
+      resultado.style.display = 'block';
+      resultado.innerHTML = `  
+  <strong>Operador:</strong> ${nome}<br>
+  <strong>Mês/Ano:</strong> ${nomeMes.toUpperCase()} ${ano}<br>
+  <strong>Dias Trabalhados:</strong> ${diasUteisTrabalhados}<br>
+  <strong>Trabalhou -4h:</strong> ${qtdDescontos4h} dias<br>
+  <strong>Total Vale Alimentação:</strong> R$ ${total.toFixed(2)}
+`;
+      document.getElementById('btnExportar').style.display = 'block';
+      document.getElementById('btnExportarCompleto').style.display = 'block';
+
+      historicoVA.push({ nome, mes: nomeMes.toUpperCase(), ano, diasTrabalhados: diasUteisTrabalhados, descontos4h: qtdDescontos4h, total });
+      atualizarHistorico();
+    }
+
+    function limparCampos() {
+      document.getElementById('beneficiario').value = '';
+      document.getElementById('valorDiario').value = '28.00';
+      document.getElementById('tipoDesconto').value = 'percentual';
+      document.getElementById('valorDesconto').value = '';
+      document.getElementById('qtdDescontos4h').value = '';
+      document.getElementById('resultado').style.display = 'none';
+      document.getElementById('btnExportar').style.display = 'none';
+      document.getElementById('btnExportarCompleto').style.display = 'none';
+      document.getElementById('historico').style.display = 'none';
+      document.querySelector('.btn-limpar').style.display = 'none';
+    }
+
+    function atualizarHistorico() {
+      const lista = document.getElementById('listaHistorico');
+      lista.innerHTML = '';
+
+      historicoVA.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${item.nome} - ${item.mes}/${item.ano} - Dias: ${item.diasTrabalhados}, -4h: ${item.descontos4h}, Total: R$ ${item.total.toFixed(2)}`;
+        const excluirBtn = document.createElement('button');
+        excluirBtn.textContent = 'Excluir';
+        excluirBtn.classList.add('btn-excluir');
+        excluirBtn.onclick = () => excluirItemHistorico(index);
+
+        li.appendChild(excluirBtn);
+        lista.appendChild(li);
+      });
+
+      document.getElementById('historico').style.display = 'block';
+      document.querySelector('.btn-limpar').style.display = 'block';
+    }
+
+    function excluirItemHistorico(index) {
+      historicoVA.splice(index, 1);
+      atualizarHistorico();
+    }
+
+    function filtrarHistorico() {
+      const filtro = document.getElementById('filtroHistorico').value.toLowerCase();
+      const lista = document.getElementById('listaHistorico');
+      const items = lista.getElementsByTagName('li');
+
+      Array.from(items).forEach(item => {
+        const nome = item.textContent.toLowerCase();
+        if (nome.includes(filtro)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const resultado = document.getElementById('resultado').innerText;
+      
+      doc.text(resultado, 10, 10);
+      doc.save('resultado.pdf');
+    }
+
+    function exportarPDFCompleto() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      historicoVA.forEach((item, index) => {
+        doc.text(`${item.nome} :  ${item.mes}/${item.ano}    Dias: ${item.diasTrabalhados},   -4h: ${item.descontos4h},   Total: R$ ${item.total.toFixed(2)}`, 10, 10 + index * 10);
+      });
+      
+      doc.save('historico_completo.pdf');
+    }
+    function filtrarHistorico() {
+  // Filtro por nome
+  const filtro = document.getElementById('filtroHistorico').value.toLowerCase();
+  const lista = document.getElementById('listaHistorico');
+  const items = lista.getElementsByTagName('li');
+
+  // Filtro por nome
+  Array.from(items).forEach(item => {
+    const nome = item.textContent.toLowerCase();
+    let exibir = nome.includes(filtro);
+
+    // Aplicar filtro de mês e ano também
+    const filtroMes = document.getElementById('filtroMesHistorico').value;
+    const filtroAno = document.getElementById('filtroAnoHistorico').value;
+
+    // Filtra por mês
+    if (filtroMes !== '') {
+      const nomeMes = new Date(2000, parseInt(filtroMes)).toLocaleString('pt-BR', { month: 'long' }).toLowerCase();
+      if (!nome.includes(nomeMes)) exibir = false;
+    }
+
+    // Filtra por ano
+    if (filtroAno !== '') {
+      if (!nome.includes(filtroAno)) exibir = false;
+    }
+
+    item.style.display = exibir ? '' : 'none';
+  });
+}
+
+// Chame filtrarHistorico ao aplicar qualquer filtro
+document.getElementById('filtroHistorico').addEventListener('input', filtrarHistorico);
+document.getElementById('filtroMesHistorico').addEventListener('change', filtrarHistorico);
+document.getElementById('filtroAnoHistorico').addEventListener('change', filtrarHistorico);
+
+// Ao carregar a página, define o mês atual no input e gera o calendário
+window.addEventListener('DOMContentLoaded', () => {
+  const hoje = new Date();
+  const mesAtual = hoje.toISOString().slice(0, 7); // yyyy-mm
+  document.getElementById('mesSelecionado').value = mesAtual;
+  gerarCalendario();
+});
+  </script>
+</body>
+</html>

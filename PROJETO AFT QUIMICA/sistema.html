@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escolha seu Sistema</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #d0e8f2);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 460px;
+      width: 100%;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .logo-central {
+      display: block;
+      margin: 0 auto 25px auto;
+      max-width: 150px;
+      height: auto;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      font-size: 28px;
+      color: #333;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin: 12px 0;
+      padding: 15px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background-color: #007bff;
+      border: none;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.03);
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .btn {
+        font-size: 14px;
+        padding: 12px 15px;
+      }
+
+      .logo-central {
+        max-width: 120px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+        align-items: flex-start;
+      }
+
+      .card {
+        padding: 20px 15px;
+        border-radius: 16px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .btn {
+        font-size: 13px;
+        padding: 10px 12px;
+      }
+
+      .logo-central {
+        max-width: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="https://www.aftquimica.com.br/images/logo.png" alt="Logo AFT Química" class="logo-central">
+
+    <h1>🔀 Escolha seu Sistema</h1>
+
+    <!-- Botões com níveis de permissão -->
+    <a href="vale-alimentacao.html" class="btn" data-permission="1">🍽️ Vale-Alimentação</a>
+    <a href="Cálculo de Rotas.html" class="btn" data-permission="2">📍 Cálculo de Rotas (teste)</a>
+    <a href="Aluguel de Veículos.html" class="btn" data-permission="2">🚗 Aluguel de Veículos</a>
+    <a href="Erros por Operador.html" class="btn" data-permission="3">❌ Erros por Operador</a>
+    <a href="Demandas.html" class="btn" data-permission="3">📝 Demandas</a>
+  </div>
+
+  <script>
+    const userPermissionLevel = parseInt(localStorage.getItem('userPermissionLevel') || '0');
+
+    if (!userPermissionLevel || isNaN(userPermissionLevel)) {
+      alert("Você precisa fazer login primeiro.");
+      window.location.href = "index.html";
+    }
+
+    document.querySelectorAll(".btn").forEach(btn => {
+      const requiredLevel = parseInt(btn.getAttribute("data-permission"));
+      if (userPermissionLevel < requiredLevel) {
+        btn.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
